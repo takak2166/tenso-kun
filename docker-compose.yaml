@@ -1,5 +1,22 @@
 version: '3'
 services: 
+  nginx:
+    container_name: nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+      - /var/www/html:/var/www/htmldock
+    ports:
+    - "8443:443"
+  certbot:
+    container_name: certbot
+    image: certbot/certbot:v2.6.0
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+      - /var/www/html:/var/www/html
+    command: ["--version"]
   tenso-kun:
     env_file:
       - .env

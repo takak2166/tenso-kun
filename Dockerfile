@@ -1,4 +1,4 @@
-FROM golang:latest as builder
+FROM golang:1.20.4 as builder
 WORKDIR /opt/
 COPY ./ /opt/
 ARG CGO_ENABLED=0
