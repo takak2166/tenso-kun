@@ -1,9 +1,28 @@
 server {
-    listen       443 ssl http2;
-    server_name  $SERVER_NAME;
+    server_name ${SERVER_NAME};
+    listen 80 default_server;
+    listen [::]:80 default_server ipv6only=on;
 
-    ssl_certificate      /etc/letsencrypt/live/$server_name/fullchain.pem;
-    ssl_certificate_key  /etc/letsencrypt/live/$server_name/privkey.pem;
+    root         /var/www/html;
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+    }
+
+    access_log  /var/log/nginx/host.access.log  ltsv;
+}
+
+server {
+    listen       443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name  ${SERVER_NAME};
+
+    ssl_certificate      /etc/letsencrypt/live/${SERVER_NAME}/fullchain.pem;
+    ssl_certificate_key  /etc/letsencrypt/live/${SERVER_NAME}/privkey.pem;
     ssl_session_timeout 1d;
     ssl_session_cache shared:SSL:10m;
     ssl_session_tickets off;
@@ -16,14 +35,11 @@ server {
 
     location / {
         proxy_set_header Host $host;
-        proxy_pass http://localhost:5000;
+	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_pass http://tenso-kun:5000;
     }
 
     #error_page  404              /404.html;
-
-    location /.well-known/acme-challenge/ {
-        root /var/www/html;
-    }
 
     # redirect server error pages to the static page /50x.html
     #

@@ -1,15 +1,19 @@
 version: '3'
-services: 
+services:
   nginx:
+    env_file:
+    - .env
     container_name: nginx
     build:
       context: ./nginx
       dockerfile: Dockerfile
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
-      - /var/www/html:/var/www/htmldock
+      - /var/www/html:/var/www/html
+      - ./nginx/templates:/etc/nginx/templates
     ports:
-    - "8443:443"
+    - "80:80"
+    - "443:443"
   certbot:
     container_name: certbot
     image: certbot/certbot:v2.6.0
