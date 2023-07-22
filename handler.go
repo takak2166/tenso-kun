@@ -1,38 +1,30 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"net/http"
-	"os"
-
-	"github.com/line/line-bot-sdk-go/v7/linebot"
 )
 
-func callback(bot *linebot.Client, r *http.Request) (resp *http.Response, err error) {
-	events, err := bot.ParseRequest(r)
+func rootHandler(w http.ResponseWriter, r *http.Request) {
+	log.Print(r)
+	fmt.Fprint(w, "OK")
+}
 
-	// validate signature
+func callbackHandler(w http.ResponseWriter, r *http.Request) {
+	log.Print(r)
+	resp, err := callback(r)
 	if err != nil {
-		return nil, err
-	}
-
-	for _, event := range events {
-		userName := "Unknown"
-		picURL := "https://imgur.com/ZelRJVU.png"
-		if event.Source.UserID != "" {
-			userName, picURL, err = getUserInfo(bot, event.Source.UserID)
-			if err != nil {
-				return nil, err
-			}
-		}
-		if event.Type == linebot.EventTypeMessage {
-			switch message := event.Message.(type) {
-			case *linebot.TextMessage:
-				resp, err = sendToWebhook(os.Getenv("WEBHOOK_LINK"), ReqestParam{userName, message.Text, picURL})
-				if err != nil {
-					return nil, err
-				}
-			}
+		if err.Error() == ErrInvalidSignature().Error() || err.Error() == ErrInvalidMessage().Error() {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			log.Print(err)
+			return
+		} else {
+			http.Error(w, "InternalServerError", http.StatusInternalServerError)
+			log.Print(err)
+			return
 		}
 	}
-	return resp, nil
+	log.Print("response: ", resp)
+	fmt.Fprint(w, resp)
 }
