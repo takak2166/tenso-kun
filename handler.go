@@ -13,7 +13,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 
 func callbackHandler(w http.ResponseWriter, r *http.Request) {
 	log.Print(r)
-	resp, err := callback(r)
+	resps, err := callback(r)
 	if err != nil {
 		if err.Error() == ErrInvalidSignature().Error() || err.Error() == ErrInvalidMessage().Error() {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -25,6 +25,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	log.Print("response: ", resp)
-	fmt.Fprint(w, resp)
+	for _, resp := range resps {
+		fmt.Fprint(w, resp)
+	}
 }

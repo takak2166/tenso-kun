@@ -6,13 +6,13 @@ import (
 	"net/url"
 )
 
-type ReqestParam struct {
+type WebhookReqParam struct {
 	UserName string `json:"username"`
 	Text     string `json:"text"`
 	IconURL  string `json:"icon_url"`
 }
 
-func sendToWebhook(webhookLink string, reqParam ReqestParam) (*http.Response, error) {
+func sendToWebhook(webhookLink string, reqParam WebhookReqParam) (*http.Response, error) {
 	p, err := json.Marshal(reqParam)
 	if err != nil {
 		return nil, err
