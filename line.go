@@ -50,13 +50,9 @@ func readEvents(r *http.Request) ([]MsgInfo, error) {
 	}
 
 	for _, event := range events {
-		userName := defaultUserName
-		picURL := defaultPicURL
-		if event.Source.UserID != "" {
-			userName, picURL, err = getUserInfo(bot, event.Source.UserID)
-			if err != nil {
-				return nil, err
-			}
+		userName, picURL, err := getUserInfo(bot, event.Source.UserID)
+		if err != nil {
+			return nil, err
 		}
 		if event.Type == linebot.EventTypeMessage {
 			switch message := event.Message.(type) {
@@ -71,9 +67,16 @@ func readEvents(r *http.Request) ([]MsgInfo, error) {
 }
 
 func getUserInfo(bot *linebot.Client, userId string) (string, string, error) {
+	if userId == "" {
+		return defaultUserName, defaultPicURL, nil
+	}
 	userProf, err := bot.GetProfile(userId).Do()
 	if err != nil {
-		return "", "", err
+		if err.Error() == "linebot: APIError 404 Not found" {
+			return defaultUserName, defaultPicURL, nil
+		} else {
+			return "", "", err
+		}
 	}
 	return userProf.DisplayName, userProf.PictureURL, nil
 }
