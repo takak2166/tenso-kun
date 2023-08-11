@@ -9,11 +9,11 @@ import (
 func TestSendToSlack(t *testing.T) {
 	testCases := []struct {
 		name        string
-		reqestParam ReqestParam
+		reqestParam WebhookReqParam
 	}{
 		{
 			name: "case1",
-			reqestParam: ReqestParam{
+			reqestParam: WebhookReqParam{
 				UserName: "test_user",
 				Text:     "test message",
 				IconURL:  "https://imgur.com/ZelRJVU.png",
@@ -25,7 +25,7 @@ func TestSendToSlack(t *testing.T) {
 			if resp, err := sendToWebhook(os.Getenv("WEBHOOK_LINK"), tc.reqestParam); err != nil {
 				t.Errorf("sendToSlack() raised error: %v", err)
 			} else if resp.StatusCode != http.StatusOK {
-				t.Errorf("sendToSlack() wants ok but %v", resp.StatusCode)
+				t.Errorf("sendToSlack() wants ok but %v. response body: %v", resp.StatusCode, resp.Body)
 			}
 		})
 	}
